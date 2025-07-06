@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Blueberry AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      background: #0b0b0b;
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 2rem;
+      margin: 0;
+    }
+    #chat {
+      max-height: 70vh;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border: 1px solid #333;
+      background: #1a1a1a;
+      border-radius: 8px;
+    }
+    .msg {
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+    .you {
+      color: #7dd3fc;
+      font-weight: 600;
+    }
+    .bot {
+      color: #f9a8d4;
+      font-style: italic;
+      font-weight: 500;
+    }
+    input,
+    button {
+      font-size: 1rem;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: none;
+    }
+    input {
+      width: 70%;
+      background: #333;
+      color: white;
+      margin-right: 0.5rem;
+    }
+    button {
+      width: 25%;
+      background: #555;
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s ease-in-out;
+    }
+    button:hover {
+      background: #7dd3fc;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌤️ Blueberry</h1>
+  <div id="chat"></div>
+  <input id="message" placeholder="Talk to me..." autocomplete="off" />
+  <button onclick="send()">Send</button>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("message");
+
+    function appendMessage(sender, text) {
+      const msg = document.createElement("div");
+      msg.className = "msg " + sender;
+      msg.textContent = (sender === "you" ? "You: " : "Blueberry: ") + text;
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    async function send() {
+      const msg = input.value.trim();
+      if (!msg) return;
+      appendMessage("you", msg);
+      input.value = "";
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg }),
+        });
+        const data = await res.json();
+        appendMessage("bot", data.reply);
+      } catch (e) {
+        appendMessage("bot", "Oops, something went wrong. Try again.");
+      }
+    }
+
+    // Allow enter key to send
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        send();
+      }
+    });
+  </script>
+</body>
+</html>
